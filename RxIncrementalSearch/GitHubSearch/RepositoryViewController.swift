@@ -18,8 +18,7 @@ class RepositoryViewController: UIViewController {
     @IBOutlet weak var RepositoryTableView: UITableView!
     @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
     
-    
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     var repositoryViewModel: RepositoryViewModel!
     //検索ボックスの値変化を監視対象にする（テキストが空っぽの場合はデータ取得を行わない）
     var rx_searchBarText: Observable<String> {
@@ -53,7 +52,7 @@ class RepositoryViewController: UIViewController {
                 cell.detailTextLabel?.text = repository.html_url
                 return cell
             }
-            .addDisposableTo(disposeBag)
+            .disposed(by: disposeBag)
         //リクエストした結果の更新を元に表示に関する処理を行う（取得したデータの件数に応じたエラーハンドリング処理）
         repositoryViewModel
             .searchResults
@@ -67,7 +66,7 @@ class RepositoryViewController: UIViewController {
                     }
                 }
             })
-            .addDisposableTo(disposeBag)
+            .disposed(by: disposeBag)
     }
     
     //キーボードのイベント監視の設定 ＆ テーブルビューに付与したGestureRecognizerに関する処理
