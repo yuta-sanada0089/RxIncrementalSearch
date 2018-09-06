@@ -25,7 +25,7 @@ class RepositoryViewController: UIViewController {
         return nameSearchBar.rx.text
             .filter {$0 != nil}
             .map{ $0! }
-            .filter { $0.characters.count > 0 }
+            .filter { !$0.isEmpty }
             .debounce(0.5, scheduler: MainScheduler.instance)
             .distinctUntilChanged()
     }
