@@ -12,20 +12,18 @@ import RxCocoa
 import RxSwift
 
 struct RepositoryViewModel {
-    //オブジェクトの初期化に合わせてプロパティの初期値を決定したいのでlazy varにする
-    lazy var rx_repositories: Driver<[Repository]> = self.fetchRepositories()
-    //監視対象のメンバ変数
-    fileprivate var repositoryName: Observable<String>
+    
+    private(set) var searchResults: Driver<[Repository]>!
     //監視対象の変数初期化処理(イニシャライザ)
     init(withNameObservable nameObservable: Observable<String>) {
-        self.repositoryName = nameObservable
+        searchResults = fetchRepositories(with: nameObservable)
     }
-    fileprivate func fetchRepositories() -> Driver<[Repository]> {
+    private func fetchRepositories(with nameObservable: Observable<String>) -> Driver<[Repository]> {
         /**
          * Observableな変数に対して、「.subscribeOn」→「.observeOn」→「.observeOn」...という形で数珠つなぎで処理を実行
          * 処理の終端まで無事にたどり着いた場合には、ObservableをDriverに変換して返却する
          */
-        return repositoryName
+        return nameObservable
             //処理Phase1: 見た目に関する処理
             .subscribeOn(MainScheduler.instance)
             .do(onNext: { response in

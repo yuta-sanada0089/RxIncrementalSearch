@@ -46,7 +46,7 @@ class RepositoryViewController: UIViewController {
          */
         repositoryViewModel = RepositoryViewModel(withNameObservable: rx_searchBarText)
         repositoryViewModel
-            .rx_repositories
+            .searchResults
             .drive(RepositoryTableView.rx.items) { (tableView, i, repository) in
                 let cell = tableView.dequeueReusableCell(withIdentifier: "RepositoryCell", for: IndexPath(row: i, section: 0))
                 cell.textLabel?.text = repository.name
@@ -56,7 +56,7 @@ class RepositoryViewController: UIViewController {
             .addDisposableTo(disposeBag)
         //リクエストした結果の更新を元に表示に関する処理を行う（取得したデータの件数に応じたエラーハンドリング処理）
         repositoryViewModel
-            .rx_repositories
+            .searchResults
             .drive(onNext: { repositories in
                 if repositories.count == 0 {
                     let alert = UIAlertController(title: ":(", message: "No repositories for this user.", preferredStyle: .alert)
