@@ -18,15 +18,14 @@ class RepositoryViewController: UIViewController {
     @IBOutlet weak var RepositoryTableView: UITableView!
     @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
     
-    
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     var repositoryViewModel: RepositoryViewModel!
     //検索ボックスの値変化を監視対象にする（テキストが空っぽの場合はデータ取得を行わない）
     var rx_searchBarText: Observable<String> {
         return nameSearchBar.rx.text
             .filter {$0 != nil}
             .map{ $0! }
-            .filter { $0.characters.count > 0 }
+            .filter { !$0.isEmpty }
             .debounce(0.5, scheduler: MainScheduler.instance)
             .distinctUntilChanged()
     }
@@ -46,17 +45,17 @@ class RepositoryViewController: UIViewController {
          */
         repositoryViewModel = RepositoryViewModel(withNameObservable: rx_searchBarText)
         repositoryViewModel
-            .rx_repositories
+            .searchResults
             .drive(RepositoryTableView.rx.items) { (tableView, i, repository) in
                 let cell = tableView.dequeueReusableCell(withIdentifier: "RepositoryCell", for: IndexPath(row: i, section: 0))
                 cell.textLabel?.text = repository.name
                 cell.detailTextLabel?.text = repository.html_url
                 return cell
             }
-            .addDisposableTo(disposeBag)
+            .disposed(by: disposeBag)
         //リクエストした結果の更新を元に表示に関する処理を行う（取得したデータの件数に応じたエラーハンドリング処理）
         repositoryViewModel
-            .rx_repositories
+            .searchResults
             .drive(onNext: { repositories in
                 if repositories.count == 0 {
                     let alert = UIAlertController(title: ":(", message: "No repositories for this user.", preferredStyle: .alert)
@@ -67,7 +66,7 @@ class RepositoryViewController: UIViewController {
                     }
                 }
             })
-            .addDisposableTo(disposeBag)
+            .disposed(by: disposeBag)
     }
     
     //キーボードのイベント監視の設定 ＆ テーブルビューに付与したGestureRecognizerに関する処理
